@@ -8,6 +8,14 @@ const calculateRouter = express.Router();
 
 calculateRouter.use(express.json());
 
+calculateRouter.get("/", async (req, res) => {
+    try {
+      const users = await Calculation.find();
+      res.send(users);
+    } catch (err) {
+      res.send(err.message);
+    }
+  });
 
 
 
