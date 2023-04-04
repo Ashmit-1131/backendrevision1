@@ -7,7 +7,7 @@ const userRouter = express.Router();
 
 userRouter.use(express.json());
 
-userRouter.get("/getprofile", async (req, res) => {
+userRouter.get("/", async (req, res) => {
   try {
     const users = await UserModel.find();
     res.send(users);
