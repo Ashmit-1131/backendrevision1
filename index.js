@@ -15,8 +15,8 @@ app.get("/",(req,res)=>{
   res.send("HOME PAGE")
 })
 
-app.use("users",userRouter)
-app.use("calculator",calculateRouter)
+app.use("/users",userRouter)
+app.use("/calculator",calculateRouter)
 
 
 
