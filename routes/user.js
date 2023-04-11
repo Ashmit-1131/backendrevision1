@@ -17,7 +17,7 @@ userRouter.get("/", async (req, res) => {
 });
 
 userRouter.post("/register", async (req, res) => {
-  const { Name, password, email } = req.body;
+  const {  password, email } = req.body;
 
   try {
     let user = await UserModel.find({ email });
@@ -28,8 +28,7 @@ userRouter.post("/register", async (req, res) => {
           console.log(err);
         } else {
           const User = new UserModel({
-            Name,
-            email,
+           email,
             password: hash
           
            

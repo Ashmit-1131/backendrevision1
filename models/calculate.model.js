@@ -1,14 +1,28 @@
 const mongoose = require('mongoose');
 
-const calculationSchema = new mongoose.Schema({
-  annualInstalmentAmount: { type: Number, required: true },
-  annualInterestRate: { type: Number, required: true },
-  totalNumberOfYears: { type: Number, required: true },
-  totalInvestmentAmount: { type: Number },
-  totalInterestGained: { type: Number },
-  totalMaturityValue: { type: Number },
+const subtaskSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  isCompleted: { type: Boolean, default: false },
 });
 
-const Calculation = mongoose.model('Calculation', calculationSchema);
+const taskSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String },
+  status: { type: String, enum: ['Todo', 'Doing', 'Done'], default: 'Todo' },
+  subtasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subtask' }],
+});
 
-module.exports = { Calculation };
+const boardSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
+});
+
+const Subtask = mongoose.model('Subtask', subtaskSchema);
+const Task = mongoose.model('Task', taskSchema);
+const Board = mongoose.model('Board', boardSchema);
+
+module.exports = {
+  Subtask,
+  Task,
+  Board,
+};

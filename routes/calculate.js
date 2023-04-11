@@ -1,58 +1,78 @@
+const express = require('express');
+const router = express.Router();
+const { Board, Task, Subtask } = require('../models/calculate.model');
 
-const express = require("express");
-const bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-const { Calculation} = require("../models/calculate.model");
+// Get all boards
+router.get('/', async (req, res) => {
+  try {
+    const boards = await Board.find().populate('tasks');
+    res.json(boards);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
 
-const calculateRouter = express.Router();
-
-calculateRouter.use(express.json());
-
-calculateRouter.get("/", async (req, res) => {
-    try {
-      const users = await Calculation.find();
-      res.send(users);
-    } catch (err) {
-      res.send(err.message);
+// Get a board by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const board = await Board.findById(req.params.id).populate('tasks');
+    if (!board) {
+      return res.status(404).json({ msg: 'Board not found' });
     }
-  });
+    res.json(board);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
 
+// Create a new board
+router.post('/', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const board = new Board({ name });
+    await board.save();
+    res.json(board);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
 
-
-calculateRouter.post('/calculate', async (req, res) => {
-    const { annualInstalmentAmount, annualInterestRate, totalNumberOfYears } = req.body;
-  
-    const P = annualInstalmentAmount;
-    const i = annualInterestRate / 100;
-    const n = totalNumberOfYears;
-  
-    const F = P * ((Math.pow(1 + i, n) - 1) / i);
-  
-    const totalInvestmentAmount = P * n;
-    const totalInterestGained = F - totalInvestmentAmount;
-  
-    const calculation = new Calculation({
-      annualInstalmentAmount,
-      annualInterestRate,
-      totalNumberOfYears,
-      totalInvestmentAmount,
-      totalInterestGained,
-      totalMaturityValue: F,
-    });
-  
-    try {
-      await calculation.save();
-      res.json({
-        totalInvestmentAmount,
-        totalInterestGained,
-        totalMaturityValue: F,
-        message: 'Calculation saved successfully',
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to save calculation' });
+// Update a board by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const { name } = req.body;
+    const board = await Board.findByIdAndUpdate(
+      req.params.id,
+      { name },
+      { new: true }
+    );
+    if (!board) {
+      return res.status(404).json({ msg: 'Board not found' });
     }
-  });
-  
-  module.exports = {
-    calculateRouter,
-  };
+    res.json(board);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// Delete a board by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const board = await Board.findById(req.params.id);
+    if (!board) {
+      return res.status(404).json({ msg: 'Board not found' });
+    }
+    await Task.deleteMany({ _id: { $in: board.tasks } });
+    await board.remove();
+    res.json({ msg: 'Board deleted' });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+module.exports = router;
